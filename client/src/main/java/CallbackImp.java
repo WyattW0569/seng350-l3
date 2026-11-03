@@ -13,11 +13,9 @@ public class CallbackImp implements Demo.Callback {
     }
 
     @Override
-    public void notifyCallback(Current current) {
-        System.out.println("notified from Server");
-        String state[] = server.getState();
+    public void notifyCallback(String msg, Current current) {
 
-        System.out.println("Callback executed: " + Arrays.toString(state));
+        System.out.println("Notification Recieved: "+ msg);
     }
 
 }

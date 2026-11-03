@@ -1,8 +1,11 @@
 import java.io.FilenameFilter;
 import java.net.Inet4Address;
 import java.nio.file.Files;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.io.File;
+import java.util.Random;
 
 import com.zeroc.Ice.ObjectAdapter;
 import com.zeroc.Ice.ObjectPrx;
@@ -10,6 +13,7 @@ import com.zeroc.Ice.Util;
 
 import Demo.CallbackPrx;
 import Demo.ChatManagerPrx;
+import Demo.BusMsg;
 
 public class Client {
     public static void main(String[] args) {
@@ -63,7 +67,13 @@ public class Client {
                     try {
                         byte[] imagePayload = Files.readAllBytes(imageFile.toPath());
                         // Message format to bus goes here
-
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                        String timestamp = LocalDateTime.now().format(formatter);
+                        Random random = new Random();
+                        int randomInt = random.nextInt(100);
+                        String tag = (randomInt < generalInterestPercentage) ? "GENERALINTEREST" : "NORMAL";
+                        BusMsg msg = new BusMsg(busID, tag, timestamp, imagePayload);
+                        chatManagerPrx.sendMessage(msg);
                         //now sleep before send next message
                         //avoid sleep after very last image
                         if (i < limit - 1) {
@@ -74,8 +84,6 @@ public class Client {
                         e.printStackTrace();
                     }
                 }
-
-                chatManagerPrx.sendMessage(hostname + ": Hello World");
 
                 communicator.waitForShutdown();
 
