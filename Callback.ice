@@ -1,9 +1,17 @@
 module Demo
 {
     sequence<string> StringSeq;
+    sequence<byte> img_payload;
+
+    struct BusMsg {
+        int busId;
+        string textTag;
+        string timestamp;
+        img_payload image;
+    };
 
     interface Callback{
-        void notifyCallback();
+        void notifyCallback(string msg);
     }
     interface ChatManager{
 
@@ -11,7 +19,7 @@ module Demo
 
         StringSeq getState();
 
-        void sendMessage(string msg);
+        void sendMessage(BusMsg msg);
     }
 
 }
