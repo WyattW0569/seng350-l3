@@ -1,0 +1,16 @@
+<state>
+  <timestamp value='1793739579718' />
+  <sourceSet name='default'>
+    <source name='/home/wyatt/Documents/Courses/Year 4/SENG 350/Lab 3/seng350-l3/Callback.ice'>
+      <file name='/home/wyatt/Documents/Courses/Year 4/SENG 350/Lab 3/seng350-l3/client/build/generated-src/Demo/BusMsg.java' />
+      <file name='/home/wyatt/Documents/Courses/Year 4/SENG 350/Lab 3/seng350-l3/client/build/generated-src/Demo/Callback.java' />
+      <file name='/home/wyatt/Documents/Courses/Year 4/SENG 350/Lab 3/seng350-l3/client/build/generated-src/Demo/ChatManager.java' />
+      <file name='/home/wyatt/Documents/Courses/Year 4/SENG 350/Lab 3/seng350-l3/client/build/generated-src/Demo/CallbackPrx.java' />
+      <file name='/home/wyatt/Documents/Courses/Year 4/SENG 350/Lab 3/seng350-l3/client/build/generated-src/Demo/_CallbackPrxI.java' />
+      <file name='/home/wyatt/Documents/Courses/Year 4/SENG 350/Lab 3/seng350-l3/client/build/generated-src/Demo/ChatManagerPrx.java' />
+      <file name='/home/wyatt/Documents/Courses/Year 4/SENG 350/Lab 3/seng350-l3/client/build/generated-src/Demo/_ChatManagerPrxI.java' />
+    </source>
+    <arg value='/usr/bin/slice2java' />
+    <arg value='-I/usr/share/ice/slice' />
+  </sourceSet>
+</state>

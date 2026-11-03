@@ -1,13 +1,13 @@
 module Demo
 {
     sequence<string> StringSeq;
-    sequence<byte> img_payload;
+    sequence<byte> ImgPayload;
 
     struct BusMsg {
         int busId;
         string textTag;
         string timestamp;
-        img_payload image;
+        ImgPayload image;
     };
 
     interface Callback{

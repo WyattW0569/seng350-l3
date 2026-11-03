@@ -23,8 +23,8 @@ subprojects {
         manifest {
             attributes(
             "Main-Class" : project.name.capitalize(),
-            "Class-Path": '/opt/Ice-3.7.9/lib/ice-3.7.9.jar'
-            //"Class-Path": configurations.runtimeClasspath.resolve().collect { it.toURI() }.join(' ')
+            //"Class-Path": '/opt/Ice-3.7.9/lib/ice-3.7.9.jar'
+            "Class-Path": configurations.runtimeClasspath.resolve().collect { it.toURI() }.join(' ')
         )
     }
 }

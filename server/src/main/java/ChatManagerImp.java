@@ -78,6 +78,11 @@ public class ChatManagerImp implements Demo.ChatManager {
         if (count % 50 == 0) {
             printThroughput();
         }
+
+        // Auto-print final summary when completing 300/client (900) or 600/client (1800)
+        if (count == 900 || count == 1800) {
+            printFinalSummary();
+        }
     }
 
     private void broadcastNotification(String notification) {
@@ -94,13 +99,36 @@ public class ChatManagerImp implements Demo.ChatManager {
     }
 
     public void printThroughput() {
-        long elapsedSec = (System.currentTimeMillis() - startTime) / 1000;
+        double elapsedSec = (System.currentTimeMillis() - startTime) / 1000.0;
         if (elapsedSec > 0) {
-            double msgThroughput = (double) processedMessages.get() / elapsedSec;
-            double notifThroughput = (double) dispatchedNotifications.get() / elapsedSec;
-            System.out.printf("Throughput -> Ingestion: %.2f msg/sec | Notifications: %.2f msg/sec%n",
-                    msgThroughput, notifThroughput);
+            int totalMsgs = processedMessages.get();
+            int totalNotifs = dispatchedNotifications.get();
+            double msgThroughput = totalMsgs / elapsedSec;
+            double notifThroughput = totalNotifs / elapsedSec;
+
+            System.out.printf("Throughput [%.1fs] -> Ingestion: %.2f msg/sec | Notifications: %.2f msg/sec%n",
+                    elapsedSec, msgThroughput, notifThroughput);
         }
+    }
+
+    public void printFinalSummary() {
+        double elapsedSec = (System.currentTimeMillis() - startTime) / 1000.0;
+        int totalMsgs = processedMessages.get();
+        int totalNotifs = dispatchedNotifications.get();
+        double msgThroughput = totalMsgs / elapsedSec;
+        double notifThroughput = totalNotifs / elapsedSec;
+
+        System.out.println("\n=================== BENCHMARK COMPLETE ===================");
+        System.out.printf("Total Elapsed Time:         %.2f s%n", elapsedSec);
+        System.out.printf("Total Messages Processed:   %d%n", totalMsgs);
+        System.out.printf("Message Throughput:         %.2f msg/sec%n", msgRate(msgThroughput));
+        System.out.printf("Total Notifications Sent:   %d%n", totalNotifs);
+        System.out.printf("Notification Throughput:    %.2f notif/sec%n", notifThroughput);
+        System.out.println("==========================================================\n");
+    }
+
+    private double msgRate(double rate) {
+        return rate;
     }
 
 }
