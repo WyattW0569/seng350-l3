@@ -1,16 +1,26 @@
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Semaphore;
-
+import java.util.concurrent.atomic.AtomicInteger;
 import com.zeroc.Ice.Current;
-
 import Demo.CallbackPrx;
+import Demo.BusMsg;
+import java.util.Random;
 
 public class ChatManagerImp implements Demo.ChatManager {
 
     private List<String> messages;
-    // Semaphore mSemaphore = new Semaphore(1);
-    private CallbackPrx callbackPrx;
+    private final List<CallbackPrx> subscribers = new CopyOnWriteArrayList<>();
+    private final String teamFolder = "./team4";
+
+    // for part 2
+    private final AtomicInteger processedMessages = new AtomicInteger(0);
+    private final AtomicInteger dispatchedNotifications = new AtomicInteger(0);
+    private long startTime = 0;
 
     ChatManagerImp() {
         messages = new ArrayList<>();
@@ -18,8 +28,10 @@ public class ChatManagerImp implements Demo.ChatManager {
 
     @Override
     public void subscribe(CallbackPrx callback, Current current) {
-        System.out.println("subscribed");
-        this.callbackPrx = callback;
+        if (callback != null && !subscribers.contains(callback)) {
+            subscribers.add(callback);
+            System.out.println("New bus subscribed. Total subscribers: " + subscribers.size());
+        }
     }
 
     @Override
@@ -34,19 +46,61 @@ public class ChatManagerImp implements Demo.ChatManager {
     }
 
     @Override
-    public void sendMessage(String msg, Current current) {
+    public void sendMessage(BusMsg msg, Current current) {
+        // check dir exists
+        File busDir = new File(teamFolder + "/" + msg.busId);
+        if (!busDir.exists()) {
+            busDir.mkdirs();
+        }
 
-        new Thread(() -> {
-            System.out.println("new Message: " + msg);
-            messages.add(msg);
+        int count = processedMessages.incrementAndGet();
+
+        // persist image payload
+        String safeTimestamp = msg.timestamp.replaceAll("[: ]", "_");
+        String filename = busDir.getPath() + "/" + safeTimestamp + "_" + count + ".jpg";
+
+        try (FileOutputStream fos = new FileOutputStream(filename)) {
+            fos.write(msg.image);
+        } catch (IOException e) {
+            System.err.println("Failed to write image for bus " + msg.busId + ": " + e.getMessage());
+        }
+        if (count == 1) {
+            startTime = System.currentTimeMillis();
+        }
+
+        // routing based on textTag
+        if ("GENERALINTEREST".equalsIgnoreCase(msg.textTag)) {
+            String notification = "GENERALINTEREST from " + msg.busId;
+            broadcastNotification(notification);
+        }
+
+        // print throughput every 50 msg
+        if (count % 50 == 0) {
+            printThroughput();
+        }
+    }
+
+    private void broadcastNotification(String notification) {
+        for (CallbackPrx subscriber : subscribers) {
             try {
-
-                Thread.sleep(2000);
+                subscriber.notifyCallback(notification);
+                dispatchedNotifications.incrementAndGet();
             } catch (Exception e) {
-                // TODO: handle exception
+                // If a client disconnected, remove them to keep list healthy
+                subscribers.remove(subscriber);
+                System.out.println("Removed unreachable subscriber.");
             }
-            callbackPrx.notifyCallback();
-        }).start();
+        }
+    }
+
+    public void printThroughput() {
+        long elapsedSec = (System.currentTimeMillis() - startTime) / 1000;
+        if (elapsedSec > 0) {
+            double msgThroughput = (double) processedMessages.get() / elapsedSec;
+            double notifThroughput = (double) dispatchedNotifications.get() / elapsedSec;
+            System.out.printf("Throughput -> Ingestion: %.2f msg/sec | Notifications: %.2f msg/sec%n",
+                    msgThroughput, notifThroughput);
+        }
     }
 
 }
